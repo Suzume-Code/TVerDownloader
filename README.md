@@ -1,17 +1,17 @@
 <p align="center">
-  <img src="main.png" alt="TVerDownloader 메인 UI" width="830">
+  <img src="main.png" alt="TVerDownloader メイン UI" width="830">
 </p>
 
 <h1>
   <img src="./logo.png" alt="TVer Downloader Logo" width="60" style="vertical-align: middle;">
-  티버 다운로더 (TVer Downloader)
+  TVer ダウンローダー (TVer Downloader)
 </h1>
 
 <a href="https://refer-nordvpn.com/RRXwGuSQXTe">
-  <img src="https://img.shields.io/badge/NORDVPN-74%25%ED%95%A0%EC%9D%B8%203개월%20무료-0054a6?style=for-the-badge&logo=nordvpn&logoColor=black&labelColor=white" alt="NordVPN 74%할인 + 3개월 무료">
+  <img src="https://img.shields.io/badge/NORDVPN-74%25%ED%95%A0%EC%9D%B8%203개월%20무료-0054a6?style=for-the-badge&logo=nordvpn&logoColor=black&labelColor=white" alt="NordVPN 74%割引 + 3ヶ月無料">
 </a>
 <a href="https://toon.at/donate/deuxdoom">
-  <img src="https://img.shields.io/badge/후원하기-투네이션-ff69b4?style=for-the-badge&logo=githubsponsors" alt="후원하기">
+  <img src="https://img.shields.io/badge/후원하기-투네이션-ff69b4?style=for-the-badge&logo=githubsponsors" alt="支援する">
 </a>
 
 [![RELEASE](https://img.shields.io/github/release/deuxdoom/TVerDownloader?style=flat&logo=github&logoColor=white&label=RELEASE&labelColor=2f353a&color=0ea5e9)](https://github.com/deuxdoom/TVerDownloader/releases/latest)
@@ -24,120 +24,120 @@
 [![Made with yt-dlp](https://img.shields.io/badge/made%20with-yt--dlp-orange?style=plastic)](https://github.com/yt-dlp/yt-dlp)
 [![Made with FFmpeg](https://img.shields.io/badge/made%20with-FFmpeg-black?style=plastic&logo=ffmpeg)](https://ffmpeg.org/)
 
+---
+
+## 📜 概要
+
+- **TVer Downloader** は日本の TVer で配信される動画をダウンロードするための GUI ベースのアプリです。<br>
+- PyQt6 を使用した直感的なインターフェースと、yt-dlp / FFmpeg の自動更新機能を備えています。<br>
+- 主に TVer の動画ダウンロードを目的としていますが、YouTube の動画でも動作します。<br>
 
 ---
 
-## 📜 간단 소개
-
-- **TVer Downloader**는 일본 티버 스트리밍 플랫폼의 동영상을 다운로드하도록 도와주는 GUI 기반의 프로그램입니다.<br>
-- PyQt6 기반의 직관적인 인터페이스와 yt-dlp/FFmpeg 자동 업데이트 등의 기능을 갖추고 있습니다.<br>
-- 기본적으로 TVer의 영상 다운로드가 주목적이지만, YouTube의 영상 역시 다운로드가 가능합니다.<br>
-
----
-
-## 💻 시스템 요구 사항
+## 💻 システム要件
 
 - Windows 10 / 11 (x64)
-- Python 3.10 이상
-- 인터넷 연결 및 일본 VPN 필요
-- 런타임 에러가 발생할 경우: [Microsoft Visual C++ 재배포 가능 패키지 (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe)
+- Python 3.10 以上
+- インターネット接続が必要
+- 日本国内向けサービスのため、日本の VPN 環境が必要になる場合があります
+- 実行時エラーが発生する場合: [Microsoft Visual C++ 再頒布可能パッケージ (x64)](https://aka.ms/vs/17/release/vc_redist.x64.exe)
 
 ---
 
-## ✨ 주요 기능
+## ✨ 主な機能
 
-- 최신 **yt-dlp** 및 **FFmpeg** 자동 업데이트
-- **단일 및 다중 다운로드** (시리즈 URL 자동 분해 지원)
-- **파일명 자유 커스터마이징** 및 순서 설정 지원
-- **화질 선택** (최상 / 1080p / 720p)
-- **포맷 변환** MP4 to AVI & MOV 오디오 추출 지원
-- **썸네일 클릭 확대**, **완료 목록 더블클릭 재생**
-- **트레이 알림**, **항상 위**, **진행률 표시 및 로그 강화**
-- **라이트 / 다크 테마 전환 기능** (기본값 라이트)
-- **다운로드 한 영상 및 즐겨찾기 시리즈 목록 자동 백업**
-- **다운로드 후 폴더 열기 / 시스템 종료 등 후속 작업 지원**
-- **가볍고 직관적인 UI** — 불필요한 기능 최소화, UX 중심 설계
-
----
-
-## 🚀 사용 방법
-
-1. TVer 영상 *URL*을 입력 창에 붙여넣기
-2. **설정** 메뉴에서 저장 폴더, 화질, 동시 다운로드 수, 파일명 규칙 등 조정
-3. **다운로드 시작** 버튼 클릭
-4. 진행률·로그·썸네일로 실시간 상태 확인
-5. **완료된 목록** 더블 클릭으로 영상재생
+- 最新の **yt-dlp** と **FFmpeg** の自動更新
+- **単一 / 複数ダウンロード** をサポート（シリーズ URL の自動展開対応）
+- **ファイル名のカスタマイズ** と出力順の設定
+- **画質選択**（最高 / 1080p / 720p）
+- **フォーマット変換**（MP4 → AVI / MOV、音声抽出）
+- **サムネイルクリックで拡大表示**、**完了項目のダブルクリックで再生**
+- **トレイ通知**、**常に最前面**、**進行状況表示とログ強化**
+- **ライト / ダークテーマ切り替え**（初期値: ライト）
+- **ダウンロード履歴とお気に入りシリーズの自動バックアップ**
+- **ダウンロード後のフォルダを開く / シャットダウンなどの後続処理**
+- **シンプルで使いやすい UI**、不要な機能を極力削減した設計
 
 ---
 
-## ❗ 주의 사항
+## 🚀 使い方
 
-- 본 프로그램은 **개인적인 아카이빙 목적**으로만 사용해야 하며, 상업적 이용이나 재배포는 금지됩니다.
-- TVer는 일본 내 서비스이므로, **일본 VPN 환경**에서만 정상 동작합니다.
-- 다운로드한 콘텐츠의 **저작권 및 이용 약관**을 반드시 준수하세요.
-- **Windows에서 'PC 보호' 또는 '서명되지 않은 파일' 경고**가 표시될 수 있습니다.  
-  이 프로그램은 직접 빌드한 오픈소스 프로젝트로, 악성코드가 없으니 안심하고 실행해도 됩니다.
-- **업데이트 시** 반드시 `TVerDownloader.exe` **파일**과 `_internal` **폴더**를 **함께 덮어쓰기** 해야 합니다.
+1. TVer の動画 URL を入力フィールドに貼り付けます
+2. **設定** メニューで保存先、画質、同時ダウンロード数、ファイル名ルールなどを調整します
+3. **ダウンロード** ボタンを押します
+4. 進行状況、ログ、サムネイルで状態を確認します
+5. **完了した項目** をダブルクリックして再生できます
 
 ---
 
-## 🔧 개발 정보
+## ❗ 注意事項
+
+- 本アプリは **個人利用のアーカイブ目的** のみに使用してください。商用利用や再配布は禁止されています。
+- TVer は日本国内向けサービスのため、**日本の VPN 環境** でのみ正常に動作する場合があります。
+- ダウンロードしたコンテンツの **著作権と利用規約** を必ず遵守してください。
+- **Windows で「PC を保護しました」や「未署名のファイル」警告** が出る場合があります。<br>
+  このプログラムはオープンソースとしてビルドされたもので、悪意のあるソフトウェアではありません。
+- **アップデート時は** `TVerDownloader.exe` **ファイルと** `_internal` **フォルダを一緒に上書きしてください。**
+
+---
+
+## 🔧 開発情報
 
 - **GUI**: PyQt6  
-- **다운로드 엔진**: yt-dlp + FFmpeg (자동 최신화 포함)  
-- **설정 저장**: JSON 기반(config/history)  
-- **안정성**: 예외 발생 시 크래시 로그(`TVerDownloader_crash.log`) 저장
+- **ダウンロードエンジン**: yt-dlp + FFmpeg（自動最新化対応）  
+- **設定保存**: JSON ベース（config / history）  
+- **安定性**: 例外発生時にクラッシュログ (`TVerDownloader_crash.log`) を保存
 
 ---
 
-## 📂 프로젝트 트리구조
+## 📂 プロジェクト構成
 ```
 📦 TVerDownloader
-├─ 🐍 TVerDownloader.py                                        — Entry point / main window bootstrap
+├─ 🐍 TVerDownloader.py                                        — エントリポイント / メインウィンドウの起動
 ├─ 📁 src
 │  ├─ 🗂️ ui
-│  │  └─ 🐍 main_window_ui.py                                   — Build main UI (header, input bar, tabs, tray)
+│  │  └─ 🐍 main_window_ui.py                                   — メイン UI を構築 (ヘッダー、入力バー、タブ、トレイ)
 │  ├─ 🧰 core
-│  │  ├─ 🐍 download_manager.py                                 — Queue & concurrency orchestrator
-│  │  ├─ 🐍 series_parser.py                                    — Series URL parse coordinator (queues → thread)
-│  │  ├─ 🐍 utils.py                                            — Config, filename template, helpers (open file, crash log)
-│  │  └─ 🐍 updater.py                                          — GitHub releases/latest checker
+│  │  ├─ 🐍 download_manager.py                                 — キュー & 同時実行管理
+│  │  ├─ 🐍 series_parser.py                                    — シリーズ URL 解析コーディネータ (キュー → スレッド)
+│  │  ├─ 🐍 utils.py                                            — 設定、ファイル名テンプレート、ヘルパー（ファイルオープン、クラッシュログ）
+│  │  └─ 🐍 updater.py                                          — GitHub releases/latest チェッカー
 │  ├─ 💬 dialogs
-│  │  ├─ 🐍 dialogs.py                                          — SettingsDialog (일반/파일명/화질/후작업/고급/캐시)
-│  │  ├─ 🐍 about_dialog.py                                     — About window (HTML features list)
-│  │  ├─ 🐍 bulk_dialog.py                                      — Multi-URL add dialog
-│  │  └─ 🐍 series_dialog.py                                    — Episode selection for series (thumb preview)
+│  │  ├─ 🐍 dialogs.py                                          — 設定ダイアログ（一般 / ファイル名 / 画質 / 後処理 / 高度 / キャッシュ）
+│  │  ├─ 🐍 about_dialog.py                                     — アバウトウィンドウ（HTML 機能一覧）
+│  │  ├─ 🐍 bulk_dialog.py                                      — 複数 URL 追加ダイアログ
+│  │  └─ 🐍 series_dialog.py                                    — シリーズ選択ダイアログ（サムネイルプレビュー付き）
 │  ├─ 🖼️ widgets
-│  │  └─ 🐍 widgets.py                                          — Download/History/Favorite item widgets + thumb cache
+│  │  └─ 🐍 widgets.py                                          — ダウンロード / 履歴 / お気に入り項目ウィジェット + サムネイルキャッシュ
 │  ├─ 🎞️ threads
-│  │  ├─ 🐍 setup_thread.py                                     — Auto-setup yt-dlp & FFmpeg
-│  │  ├─ 🐍 series_parse_thread.py                               — Parse series → episode list (skip “予告”)
-│  │  ├─ 🐍 download_thread.py                                   — Download + mux + subtitles + progress parsing
-│  │  └─ 🐍 conversion_thread.py                                 — Optional format conversion
+│  │  ├─ 🐍 setup_thread.py                                     — yt-dlp & FFmpeg 自動セットアップ
+│  │  ├─ 🐍 series_parse_thread.py                               — シリーズ解析 → エピソード一覧抽出
+│  │  ├─ 🐍 download_thread.py                                   — ダウンロード + マージ + 字幕 + 進行解析
+│  │  └─ 🐍 conversion_thread.py                                 — オプションのフォーマット変換
 │  ├─ 🗃️ stores
-│  │  ├─ 🐍 history_store.py                                    — urlhistory.json + rolling backups
-│  │  └─ 🐍 favorites_store.py                                  — favorites.json + backups
+│  │  ├─ 🐍 history_store.py                                    — urlhistory.json + ローリングバックアップ
+│  │  └─ 🐍 favorites_store.py                                  — favorites.json + バックアップ
 │  ├─ 🎨 theme
-│  │  ├─ 🐍 qss.py                                              — Light/Dark QSS builder
-│  │  └─ 🐍 icon.py                                             — App icon (Base64 → QIcon)
-│  └─ (optional) 📄 __init__.py                                  — If packaging as a module
-├─ 🧾 Generated at runtime
-│  ├─ 📄 downloader_config.json                                  — User settings
-│  ├─ 📄 urlhistory.json                                         — Download history
-│  ├─ 📁 thumbnails/                                             — Cached thumbnails
-│  ├─ 📁 historybak/                                             — History backups
-│  ├─ 📁 favoritbak/                                             — Favorites backups
-│  └─ 📄 TVerDownloader_crash.log                                — Crash logs
-└─ ⚙️ External tools (auto-setup)
+│  │  ├─ 🐍 qss.py                                              — ライト / ダーク QSS ビルダー
+│  │  └─ 🐍 icon.py                                             — アプリアイコン (Base64 → QIcon)
+│  └─ (optional) 📄 __init__.py                                  — モジュール化時のエントリ
+├─ 🧾 実行時生成
+│  ├─ 📄 downloader_config.json                                  — ユーザー設定
+│  ├─ 📄 urlhistory.json                                         — ダウンロード履歴
+│  ├─ 📁 thumbnails/                                             — キャッシュされたサムネイル
+│  ├─ 📁 historybak/                                             — 履歴バックアップ
+│  ├─ 📁 favoritbak/                                             — お気に入りバックアップ
+│  └─ 📄 TVerDownloader_crash.log                                — クラッシュログ
+└─ ⚙️ External tools (自動セットアップ)
    ├─ 📄 yt-dlp(.exe)
    └─ 📄 ffmpeg(.exe)
 ```
 ---
 
-## 🤝 기여 및 응원
+## 🤝 貢献と応援
 
-- 버그 제보 및 코드 기여: [Issues](https://github.com/deuxdoom/TVerDownloader/issues)  
-- 개발자 응원: [YouTube 구독](https://www.youtube.com/@LE_SSERAFIM?sub_confirmation=1)  
-- 별 ⭐을 눌러주시면 큰 힘이 됩니다!
+- バグ報告・コード貢献: [Issues](https://github.com/deuxdoom/TVerDownloader/issues)  
+- 開発者支援: [YouTube チャンネル登録](https://www.youtube.com/@LE_SSERAFIM?sub_confirmation=1)  
+- ⭐ を押していただけると励みになります！
 
 ---
