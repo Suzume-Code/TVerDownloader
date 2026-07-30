@@ -1,6 +1,6 @@
 # src/download_manager.py
-# (변경 없음, 이전 답변과 동일)
-# 수정: _start_download에서 자막 관련 설정 3개를 읽어 DownloadThread로 전달
+# (変更なし、前回の回答と同じ)
+# 修正: _start_download で字幕関連設定 3つを読み取り DownloadThread に渡します
 
 import os
 import subprocess
@@ -38,10 +38,10 @@ class DownloadManager(QObject):
     def add_task(self, url: str) -> bool:
         url = (url or "").strip()
         if not url or url in self._active_urls:
-            if url in self._active_urls: self.log.emit(f"[알림] 이미 대기열/작업 중인 URL입니다: {url}")
+            if url in self._active_urls: self.log.emit(f"[お知らせ] すでにキュー/処理中のURLです: {url}")
             return False
         self._active_urls.add(url); self._task_queue.append(url)
-        self.item_added.emit(url); self.log.emit(f"[대기열] 추가됨: {url}")
+        self.item_added.emit(url); self.log.emit(f"[キュー] 追加されました: {url}")
         self._update_queue_counter(); self.check_queue_and_start()
         return True
 
@@ -52,7 +52,7 @@ class DownloadManager(QObject):
     def remove_task_from_queue(self, url: str):
         if url in self._task_queue:
             self._task_queue.remove(url); self._active_urls.remove(url)
-            self._update_queue_counter(); self.log.emit(f"[대기열] 제거됨: {url}")
+            self._update_queue_counter(); self.log.emit(f"[キュー] 削除されました: {url}")
             return True
         return False
 
@@ -71,21 +71,21 @@ class DownloadManager(QObject):
         quality_format = self.config.get("quality", "bv*+ba/b")
         bandwidth_limit = self.config.get("bandwidth_limit", "0")
 
-        # --- [추가된 부분 시작] ---
-        # 자막 설정 읽기
+        # --- [追加された部分 開始] ---
+        # 字幕設定を読み込む
         download_subs = self.config.get("download_subtitles", True)
         embed_subs = self.config.get("embed_subtitles", True)
         subtitle_format = self.config.get("subtitle_format", "vtt")
-        # --- [추가된 부분 끝] ---
+        # --- [追加された部分 終了] ---
 
         thread = DownloadThread(url=url, download_folder=download_folder, ytdlp_exe_path=self.ytdlp_path,
                                 ffmpeg_exe_path=self.ffmpeg_path, output_template=output_template,
                                 quality_format=quality_format, bandwidth_limit=bandwidth_limit,
-                                # --- [추가된 부분 시작] ---
+                                # --- [追加された部分 開始] ---
                                 download_subtitles=download_subs,
                                 embed_subtitles=embed_subs,
                                 subtitle_format=subtitle_format
-                                # --- [추가된 부분 끝] ---
+                                # --- [追加された部分 終了] ---
                                 )
         thread.progress.connect(self._on_progress); thread.finished.connect(self._on_download_finished)
         self._active_threads[url] = thread; self._logged_start.discard(url); thread.start()
@@ -94,7 +94,7 @@ class DownloadManager(QObject):
     def _on_progress(self, url: str, payload: Dict[str, Any]):
         if url not in self._logged_start and 'log' in payload:
             self._logged_start.add(url)
-            self.log.emit(f"{'='*44}\n다운로드 시작: {url}\n{'='*44}")
+            self.log.emit(f"{'='*44}\nダウンロード開始: {url}\n{'='*44}")
         self.progress_updated.emit(url, payload)
         
     def _get_video_codec(self, filepath: str) -> Optional[str]:
@@ -113,13 +113,13 @@ class DownloadManager(QObject):
             proc = subprocess.run(command, capture_output=True, text=True, startupinfo=get_startupinfo(), timeout=10)
             if proc.returncode == 0:
                 codec = proc.stdout.strip()
-                self.log.emit(f"파일 코덱 확인: '{codec}' ({filepath})")
+                self.log.emit(f"ファイルコーデック確認: '{codec}' ({filepath})")
                 return codec
             else:
-                self.log.emit(f"[오류] ffprobe 코덱 확인 실패: {proc.stderr}")
+                self.log.emit(f"[エラー] ffprobe コーデック確認に失敗しました: {proc.stderr}")
                 return None
         except Exception as e:
-            self.log.emit(f"[오류] ffprobe 실행 중 예외 발생: {e}")
+            self.log.emit(f"[エラー] ffprobe 実行中に例外が発生しました: {e}")
             return None
 
     def _on_download_finished(self, url: str, success: bool, final_filepath: str, metadata: dict):
@@ -127,11 +127,11 @@ class DownloadManager(QObject):
         if thread: thread.deleteLater()
         
         if not success or not final_filepath or not os.path.exists(final_filepath):
-            self.log.emit(f"[실패] 다운로드 실패 또는 파일 없음: {url}")
+            self.log.emit(f"[失敗] ダウンロードに失敗したかファイルが存在しません: {url}")
             self.task_finished.emit(url, False, "", metadata)
             self._check_completion(); return
         
-        self.log.emit(f"[성공] 다운로드 완료: {final_filepath}")
+        self.log.emit(f"[成功] ダウンロード完了: {final_filepath}")
         self._conversion_meta_cache[url] = metadata
 
         target_container_format = self.config.get("conversion_format", "none")
@@ -146,17 +146,17 @@ class DownloadManager(QObject):
         target_codec = codec_map.get(preferred_codec_key)
         
         if current_codec and target_codec and current_codec != target_codec:
-            self.log.emit(f"코덱 불일치. 변환 시작: (원본) '{current_codec}' -> (목표) '{target_codec}'")
+            self.log.emit(f"コーデック不一致。変換開始: (元) '{current_codec}' -> (目標) '{target_codec}'")
             self._start_conversion(url, final_filepath, target_codec=target_codec, delete_original=True)
         else:
-            if current_codec: self.log.emit(f"코덱 일치 ('{current_codec}'). 변환이 불필요합니다.")
+            if current_codec: self.log.emit(f"コーデック一致 ('{current_codec}')。変換は不要です。")
             self.task_finished.emit(url, True, final_filepath, metadata)
             self._check_completion()
             
     def _start_conversion(self, url: str, input_path: str, target_format: Optional[str] = None, target_codec: Optional[str] = None, delete_original: Optional[bool] = None):
         status_msg = ""
-        if target_format: status_msg = f"{target_format.upper()} 변환 중..."
-        elif target_codec: status_msg = f"{target_codec.upper()} 변환 중..."
+        if target_format: status_msg = f"{target_format.upper()} 変換中..."
+        elif target_codec: status_msg = f"{target_codec.upper()} 変換中..."
         self.progress_updated.emit(url, {"status": status_msg})
         
         delete_on_conv = self.config.get("delete_on_conversion", False)
@@ -186,7 +186,7 @@ class DownloadManager(QObject):
         thread = self._active_conversions.pop(url, None)
         if thread: thread.deleteLater()
         meta = self._conversion_meta_cache.pop(url, {})
-        final_status = "완료" if success else "변환 오류"
+        final_status = "完了" if success else "変換エラー"
         payload = {"status": final_status}
         if success: payload["final_filepath"] = new_filepath
         self.progress_updated.emit(url, payload)

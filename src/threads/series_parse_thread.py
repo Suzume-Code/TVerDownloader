@@ -1,6 +1,6 @@
 # src/threads/series_parse_thread.py
-# 수정:
-# - run 메서드에서 시리즈 제목 파싱 시 'playlist_title' 키를 우선 확인하도록 변경
+# 修正:
+# - runメソッドでシリーズタイトル解析時に'playlist_title'キーを優先して確認するように変更
 
 import subprocess
 import json
@@ -11,9 +11,9 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from src.utils import get_startupinfo
 
 class SeriesParseThread(QThread):
-    """시리즈 URL을 받아 하위 에피소드 정보(딕셔너리) 리스트를 반환하는 스레드."""
+    """シリーズURLを受け取り、サブエピソード情報（辞書）のリストを返すスレッド。"""
     log = pyqtSignal(str)
-    finished = pyqtSignal(str, list) # (시리즈 제목, 에피소드 정보 리스트)
+    finished = pyqtSignal(str, list) # (シリーズタイトル, エピソード情報リスト)
 
     def __init__(self, series_url: str, ytdlp_exe_path: str, exclude_keywords: List[str], parent=None):
         super().__init__(parent)
@@ -35,7 +35,7 @@ class SeriesParseThread(QThread):
         for meta in entries:
             if not isinstance(meta, dict): continue
             url = meta.get("webpage_url") or meta.get("url")
-            title = meta.get("title", "제목 없음")
+            title = meta.get("title", "(タイトルなし)")
             thumbnail_url = meta.get("thumbnail")
             if url and title and not self._is_excluded(title):
                 results.append({
@@ -73,7 +73,7 @@ class SeriesParseThread(QThread):
 
     def run(self):
         try:
-            self.log.emit(f"[시리즈] 분석 중 (1/2): {self.series_url}")
+            self.log.emit(f"[シリーズ] 解析中 (1/2): {self.series_url}")
             command1 = [self.ytdlp_exe_path, "-J", "--skip-download", "--no-warnings", self.series_url]
             startupinfo = get_startupinfo()
             proc1 = subprocess.Popen(
@@ -86,21 +86,21 @@ class SeriesParseThread(QThread):
             episodes = []
 
             if proc1.returncode == 0:
-                # --- [수정된 부분 시작] ---
+                # --- [修正済み部分 開始] ---
                 try:
                     data = json.loads(out1)
-                    # ✅ 'playlist_title'을 먼저 확인하고, 없으면 'title' 확인
+                    # ✅ 'playlist_title'を先に確認し、なければ'title'を確認
                     series_title = data.get("playlist_title") or data.get("title", "")
                 except json.JSONDecodeError:
                     pass
-                # --- [수정된 부분 끝] ---
+                # --- [修正済み部分 終了] ---
                 episodes = self._parse_json_output(out1)
             else:
-                self.log.emit(f"[오류] 시리즈 1차 분석 실패:\n{(err1 or '').strip()}");
+                self.log.emit(f"[エラー] シリーズ1次解析失敗:\n{(err1 or '').strip()}");
                 self.finished.emit("", []); return
 
             if not episodes:
-                self.log.emit("[시리즈] 1차 분석 결과 없음. 2차 분석 시도...")
+                self.log.emit("[シリーズ] 1次解析結果なし。2次解析を試行中...")
                 command2 = [self.ytdlp_exe_path, "--flat-playlist", "--print", "%(url)s\t%(title)s", "--skip-download", "--no-warnings", self.series_url]
                 proc2 = subprocess.Popen(
                     command2, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -109,13 +109,13 @@ class SeriesParseThread(QThread):
                 out2, err2 = proc2.communicate()
 
                 if proc2.returncode != 0:
-                    self.log.emit(f"[오류] 시리즈 2차 분석 실패:\n{(err2 or '').strip()}");
+                    self.log.emit(f"[エラー] シリーズ2次解析失敗:\n{(err2 or '').strip()}");
                     self.finished.emit(series_title, []); return
                 
                 episodes = self._parse_flat_output(out2)
-                if not episodes and err2: self.log.emit(f"[진단] 2차 분석 결과 없음. 오류 스트림: {(err2 or '없음').strip()}")
+                if not episodes and err2: self.log.emit(f"[診断] 2次解析結果なし。エラーストリーム: {(err2 or 'なし').strip()}")
 
-            self.log.emit(f"최종 {len(episodes)}개 에피소드 정보 추출 완료.")
+            self.log.emit(f"最終 {len(episodes)} 件のエピソード情報抽出完了。")
             self.finished.emit(series_title, episodes)
         except Exception as e:
             self.log.emit(f"[오류] 시리즈 분석 중 예외: {e}");

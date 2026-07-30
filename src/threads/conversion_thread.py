@@ -1,6 +1,6 @@
 # src/threads/conversion_thread.py
-# 수정:
-# - _get_video_encoder_args: 로그 메시지에 실제 품질 값(CRF/CQ)을 표시하도록 변경
+# 修正:
+# - _get_video_encoder_args: ログメッセージに実際の品質値(CRF/CQ)を表示するよう変更
 
 import os
 import subprocess
@@ -30,7 +30,7 @@ class ConversionThread(QThread):
         self.quality_cfg = quality_cfg
 
     def _get_video_encoder_args(self) -> List[str]:
-        """선호 코덱과 GPU/CPU 설정에 맞는 FFmpeg 인코더 및 품질 인자를 반환합니다."""
+        """優先するコーデックとGPU/CPU設定に応じたFFmpegエンコーダーと品質引数を返します。"""
         if not self.target_codec:
             return []
 
@@ -47,9 +47,9 @@ class ConversionThread(QThread):
         encoders = codec_map[self.target_codec]
         args: List[str] = []
         encoder_name: Optional[str] = None
-        quality_val_str = "" # ✅ 로그 출력용 품질 값 문자열
+        quality_val_str = "" # ✅ ログ出力用の品質値文字列
         
-        # 2. 설정에 따라 인코더 및 품질 옵션 선택
+        # 2. 設定に応じてエンコーダーと品質オプションを選択
         if self.hw_encoder_setting == "nvidia" and encoders[0]:
             encoder_name = encoders[0]
             q_val = self.quality_cfg.get("gpu_cq", 30)
@@ -69,7 +69,7 @@ class ConversionThread(QThread):
             args = ['-c:v', encoder_name, '-rc', 'cqp', '-qp_i', str(q_val), '-qp_p', str(q_val), '-qp_b', str(q_val)]
         
         else: 
-            # 3. CPU 또는 Fallback
+            # 3. CPUまたはフォールバック
             encoder_name = encoders[3]
             if not encoder_name:
                 return ['-c:v', 'copy']
@@ -91,8 +91,8 @@ class ConversionThread(QThread):
                 quality_val_str = f"CRF={q_val}"
                 args = ['-c:v', encoder_name, '-crf', str(q_val), '-preset', 'medium']
 
-        # ✅ 로그 메시지에 실제 품질 값 표시
-        self.log.emit(f"사용할 인코더: {encoder_name} (설정: {self.hw_encoder_setting}, 품질: {quality_val_str})")
+        # ✅ ログメッセージに実際の品質値を表示
+        self.log.emit(f"使用するエンコーダー: {encoder_name} (設定: {self.hw_encoder_setting}, 品質: {quality_val_str})")
         return args
 
     def run(self):
@@ -101,7 +101,7 @@ class ConversionThread(QThread):
         elif self.target_format:
             output_path = self.input_path.with_suffix(f".{self.target_format}")
         else:
-            self.log.emit("[오류] 변환 목표(포맷 또는 코덱)가 지정되지 않았습니다.")
+            self.log.emit("[エラー] 変換目標（フォーマットまたはコーデック）が指定されていません。")
             self.finished.emit(False, self.url, ""); return
 
         command = [self.ffmpeg_path, '-i', str(self.input_path), '-y']
@@ -118,23 +118,23 @@ class ConversionThread(QThread):
         command.append(str(output_path))
 
         try:
-            self.log.emit(f"파일 변환 시작: '{self.input_path.name}' -> '{output_path.name}'")
+            self.log.emit(f"ファイル変換開始: '{self.input_path.name}' -> '{output_path.name}'")
             flags = subprocess.DETACHED_PROCESS | subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
             
             proc = subprocess.run(command, capture_output=True, text=True, encoding="utf-8",
                                   startupinfo=get_startupinfo(), creationflags=flags)
             
             if proc.returncode == 0:
-                self.log.emit(f"파일 변환 성공: '{output_path.name}'")
+                self.log.emit(f"ファイル変換成功: '{output_path.name}'")
                 if self.delete_original and self.input_path.exists():
                     try:
                         self.input_path.unlink()
-                        self.log.emit(f"원본 파일 삭제: '{self.input_path.name}'")
+                        self.log.emit(f"元ファイルを削除しました: '{self.input_path.name}'")
                     except OSError as e:
-                        self.log.emit(f"[오류] 원본 파일 삭제 실패: {e}")
+                        self.log.emit(f"[エラー] 元ファイルの削除に失敗しました: {e}")
                 self.finished.emit(True, self.url, str(output_path))
             else:
-                self.log.emit(f"[오류] 파일 변환 실패: {proc.stderr}")
+                self.log.emit(f"[エラー] ファイル変換に失敗しました: {proc.stderr}")
                 if output_path.exists(): output_path.unlink()
                 self.finished.emit(False, self.url, "")
         except Exception as e:

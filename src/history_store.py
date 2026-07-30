@@ -18,7 +18,7 @@ class HistoryStore:
         self._data: Dict[str, dict] = {}
         self.backup_dir: Path = backup_dir or self.DEFAULT_BAK_DIR
         self.keep_backups: int = max(0, int(keep_backups))
-        # UI 블로킹 방지를 위한 단일 스레드 실행기
+        # UIブロッキングを防ぐためのシングルスレッド実行機
         self._executor = ThreadPoolExecutor(max_workers=1)
 
     def load(self) -> bool:
@@ -44,13 +44,13 @@ class HistoryStore:
             self._data = {}; return False
 
     def save(self) -> None:
-        """비동기로 저장을 수행하여 UI 블로킹을 방지합니다."""
-        # 현재 데이터의 스냅샷을 만들어 백그라운드 스레드로 전달
+        """非同期保存を行いUIブロックを防ぎます。"""
+        # 現在のデータのスナップショットを作成し、バックグラウンドスレッドに渡します
         data_snapshot = self._data.copy()
         self._executor.submit(self._save_sync, data_snapshot)
 
     def _save_sync(self, data: Dict[str, dict]) -> bool:
-        """실제 디스크 쓰기 작업 (백그라운드에서 실행됨)"""
+        """実際のディスク書き込み処理（バックグラウンドで実行）"""
         try:
             target = Path(self.path)
             self.backup_dir.mkdir(parents=True, exist_ok=True)
@@ -81,16 +81,16 @@ class HistoryStore:
 
     def get_title(self, url: str) -> str:
         entry = self._data.get((url or "").strip(), {})
-        return entry.get("title", "(제목 없음)")
+        return entry.get("title", "(タイトルなし)")
 
     def add(self, url: str, title: str, filepath: Optional[str] = None, 
             series_id: Optional[str] = None, thumbnail_url: Optional[str] = None):
-        """기록에 항목을 추가합니다. series_id와 thumbnail_url을 선택적으로 저장합니다."""
+        """履歴にエントリを追加します。series_idとthumbnail_urlをオプションで保存します。"""
         url = (url or "").strip()
         if not url: return
         
         self._data[url] = {
-            "title": title or "(제목 없음)",
+            "title": title or "(タイトルなし)",
             "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "filepath": filepath or "",
             "series_id": series_id,

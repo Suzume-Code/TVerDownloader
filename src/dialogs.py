@@ -19,7 +19,7 @@ class SettingsDialog(QDialog):
     def __init__(self, config: dict, parent: QWidget | None = None):
         super().__init__(parent)
         self.config = config
-        self.setWindowTitle("설정")
+        self.setWindowTitle("設定")
         self.setMinimumSize(560, 640)
         root = QVBoxLayout(self)
         self.tabs = QTabWidget(self)
@@ -32,8 +32,8 @@ class SettingsDialog(QDialog):
         self._create_advanced_tab()
         self._create_cache_tab()
         self.buttons = QDialogButtonBox()
-        save_btn = self.buttons.addButton("설정 저장", QDialogButtonBox.ButtonRole.AcceptRole)
-        exit_btn = self.buttons.addButton("나가기", QDialogButtonBox.ButtonRole.RejectRole)
+        save_btn = self.buttons.addButton("設定を保存", QDialogButtonBox.ButtonRole.AcceptRole)
+        exit_btn = self.buttons.addButton("戻る", QDialogButtonBox.ButtonRole.RejectRole)
         root.addWidget(self.buttons)
         save_btn.clicked.connect(self._save_settings)
         exit_btn.clicked.connect(self.reject)
@@ -54,67 +54,67 @@ class SettingsDialog(QDialog):
         self.cache_size_label.setText(self._calculate_cache_size())
 
     def _clear_thumbnail_cache(self):
-        msg_box = QMessageBox(self); msg_box.setWindowTitle('캐시 삭제')
-        msg_box.setText("정말로 모든 썸네일 캐시를 삭제하시겠습니까?")
+        msg_box = QMessageBox(self); msg_box.setWindowTitle('キャッシュの削除')
+        msg_box.setText("本当にすべてのサムネイルキャッシュを削除しますか？")
         msg_box.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         msg_box.setDefaultButton(QMessageBox.StandardButton.No)
-        msg_box.button(QMessageBox.StandardButton.Yes).setText('예'); msg_box.button(QMessageBox.StandardButton.No).setText('아니오')
+        msg_box.button(QMessageBox.StandardButton.Yes).setText('はい'); msg_box.button(QMessageBox.StandardButton.No).setText('いいえ')
         if msg_box.exec() == QMessageBox.StandardButton.No: return
         count = 0
         try:
             for f in THUMBNAIL_CACHE_DIR.glob('**/*'):
                 if f.is_file(): f.unlink(); count += 1
-            QMessageBox.information(self, "완료", f"썸네일 캐시 {count}개를 삭제했습니다.")
+            QMessageBox.information(self, "完了", f"サムネイルキャッシュ {count}項目を削除しました。")
         except Exception as e:
-            QMessageBox.critical(self, "오류", f"캐시 삭제 중 오류 발생:\n{e}")
+            QMessageBox.critical(self, "エラー", f"キャッシュの削除中にエラーが発生しました。:\n{e}")
         finally:
             self._update_cache_label()
 
     def _create_general_tab(self):
         tab = QWidget(); layout = QVBoxLayout(tab); layout.setSpacing(15)
         folder_group = QWidget(); folder_layout = QVBoxLayout(folder_group); folder_layout.setContentsMargins(0,0,0,0)
-        folder_layout.addWidget(QLabel("다운로드 폴더:"))
+        folder_layout.addWidget(QLabel("ダウンロードフォルダ:"))
         row = QHBoxLayout()
         self.folder_path_edit = QLineEdit(self.config.get("download_folder", "")); self.folder_path_edit.setReadOnly(True)
         self.folder_path_edit.setObjectName("PathDisplayEdit")
         row.addWidget(self.folder_path_edit, 1)
-        browse = QPushButton("찾아보기..."); browse.clicked.connect(self._browse_folder); row.addWidget(browse)
+        browse = QPushButton("検索..."); browse.clicked.connect(self._browse_folder); row.addWidget(browse)
         folder_layout.addLayout(row); layout.addWidget(folder_group)
         dl_count_group = QWidget(); dl_count_layout = QHBoxLayout(dl_count_group); dl_count_layout.setContentsMargins(0,0,0,0)
-        dl_count_layout.addWidget(QLabel("최대 동시 다운로드 개수:"))
+        dl_count_layout.addWidget(QLabel("最大同時ダウンロード数:"))
         self.concurrent_spinbox = QSpinBox()
-        self.concurrent_spinbox.setRange(1, PARALLEL_MAX) # 수정: PARALLEL_MAX 적용
+        self.concurrent_spinbox.setRange(1, PARALLEL_MAX) # 修正: PARALLEL_MAX を適用
         self.concurrent_spinbox.setValue(self.config.get("max_concurrent_downloads", 5))
         dl_count_layout.addWidget(self.concurrent_spinbox); dl_count_layout.addStretch(1); layout.addWidget(dl_count_group)
         theme_group = QWidget(); theme_layout = QVBoxLayout(theme_group); theme_layout.setContentsMargins(0,0,0,0)
-        theme_layout.addWidget(QLabel("테마:"))
+        theme_layout.addWidget(QLabel("テーマ:"))
         self.theme_button_group = QButtonGroup(self)
         theme_radio_layout = QHBoxLayout()
-        themes = {"라이트 (기본값)": "light", "다크": "dark"}
+        themes = {"ライト（デフォルト）": "light", "ダーク": "dark"}
         current_theme = self.config.get("theme", "light")
         for text, key in themes.items():
             radio = QRadioButton(text); radio.setProperty("config_value", key)
             self.theme_button_group.addButton(radio); theme_radio_layout.addWidget(radio)
             if key == current_theme: radio.setChecked(True)
         theme_radio_layout.addStretch(1); theme_layout.addLayout(theme_radio_layout); layout.addWidget(theme_group)
-        layout.addStretch(1); self.tabs.addTab(tab, "일반")
+        layout.addStretch(1); self.tabs.addTab(tab, "一般")
 
     def _create_filename_tab(self):
         tab = QWidget(); layout = QVBoxLayout(tab)
-        layout.addWidget(QLabel("파일명 구성 요소 선택 및 순서 설정:"))
+        layout.addWidget(QLabel("ファイル名の構成要素の選択と順序の設定:"))
         list_row = QHBoxLayout()
         self.order_list = QListWidget(); self.order_list.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.order_list.setDragDropMode(QAbstractItemView.DragDropMode.NoDragDrop)
         fm = self.order_list.fontMetrics(); row_h = max(28, fm.height() + 12)
         self.order_list.setStyleSheet("QListWidget::item{ padding:6px 8px; }")
         btn_col = QVBoxLayout()
-        self.up_btn = QToolButton(toolTip="위로", shortcut="Alt+Up"); self.down_btn = QToolButton(toolTip="아래로", shortcut="Alt+Down")
+        self.up_btn = QToolButton(toolTip="上へ", shortcut="Alt+Up"); self.down_btn = QToolButton(toolTip="下へ", shortcut="Alt+Down")
         self.up_btn.setFixedSize(32, 32); self.down_btn.setFixedSize(32, 32)
         self.up_btn.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowUp))
         self.down_btn.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown))
         btn_col.addWidget(self.up_btn); btn_col.addWidget(self.down_btn); btn_col.addStretch(1)
         list_row.addWidget(self.order_list, 1); list_row.addLayout(btn_col); layout.addLayout(list_row, 1)
-        self.part_names: dict[str, str] = {"series": "시리즈명", "upload_date": "방송날짜", "episode_number": "회차번호", "episode": "타이틀", "id": "고유ID"}
+        self.part_names: dict[str, str] = {"series": "シリーズ名", "upload_date": "放送日", "episode_number": "話数", "episode": "タイトル", "id": "固有ID"}
         parts_cfg: dict = self.config.get("filename_parts", {})
         current_order = self.config.get("filename_order", list(self.part_names.keys()))
         for key in current_order:
@@ -122,11 +122,11 @@ class SettingsDialog(QDialog):
             item = QListWidgetItem(self.part_names[key]); item.setData(ROLE_KEY, key)
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable); item.setCheckState(Qt.CheckState.Checked if parts_cfg.get(key, True) else Qt.CheckState.Unchecked)
             item.setSizeHint(QSize(0, row_h)); self.order_list.addItem(item)
-        pv = QHBoxLayout(); pv.addWidget(QLabel("파일명 미리보기:")); self.preview_label = QLabel(); pv.addWidget(self.preview_label, 1); layout.addLayout(pv)
+        pv = QHBoxLayout(); pv.addWidget(QLabel("ファイル名プレビュー:")); self.preview_label = QLabel(); pv.addWidget(self.preview_label, 1); layout.addLayout(pv)
         self.order_list.itemChanged.connect(self._update_preview)
         self.order_list.currentRowChanged.connect(self._sync_move_buttons)
         self.up_btn.clicked.connect(lambda: self._move_selected(-1)); self.down_btn.clicked.connect(lambda: self._move_selected(+1))
-        self._update_preview(); self._sync_move_buttons(); self.tabs.addTab(tab, "파일명")
+        self._update_preview(); self._sync_move_buttons(); self.tabs.addTab(tab, "ファイル名")
 
     def _move_selected(self, delta: int):
         row = self.order_list.currentRow(); new_row = row + delta
@@ -147,9 +147,9 @@ class SettingsDialog(QDialog):
         tab = QWidget(); layout = QVBoxLayout(tab); layout.setSpacing(15)
         
         q_groupbox = QWidget(); q_layout = QVBoxLayout(q_groupbox); q_layout.setContentsMargins(0,0,0,0)
-        q_layout.addWidget(QLabel("다운로드 화질 선택:"))
+        q_layout.addWidget(QLabel("ダウンロード画質の選択:"))
         q_radio_layout = QVBoxLayout(); q_radio_layout.setSpacing(10); self.quality_button_group = QButtonGroup(self)
-        qualities = {"최상 화질 (기본값)": "bv*+ba/b", "1080p": "bestvideo[height<=1080]+bestaudio/best[height<=1080]", "720p": "bestvideo[height<=720]+bestaudio/best[height<=720]"}
+        qualities = {"最高画質（デフォルト）": "bv*+ba/b", "1080p": "bestvideo[height<=1080]+bestaudio/best[height<=1080]", "720p": "bestvideo[height<=720]+bestaudio/best[height<=720]"}
         current_quality = self.config.get("quality", "bv*+ba/b")
         for text, key in qualities.items():
             radio = QRadioButton(text); radio.setProperty("config_value", key); self.quality_button_group.addButton(radio); q_radio_layout.addWidget(radio)
@@ -157,9 +157,9 @@ class SettingsDialog(QDialog):
         q_layout.addLayout(q_radio_layout); layout.addWidget(q_groupbox)
 
         c_groupbox = QWidget(); c_layout = QVBoxLayout(c_groupbox); c_layout.setContentsMargins(0,0,0,0)
-        c_layout.addWidget(QLabel("선호 코덱 (재인코딩):"))
+        c_layout.addWidget(QLabel("優先コーデック (再エンコード):"))
         c_radio_layout = QVBoxLayout(); c_radio_layout.setSpacing(10); self.codec_button_group = QButtonGroup(self)
-        codecs = {"AVC/H.264 (최고 호환성)": "avc", "HEVC/H.265 (고효율)": "hevc", "VP9 (웹 표준)": "vp9", "AV1 (차세대)": "av1"}
+        codecs = {"AVC/H.264（最大互換性）": "avc", "HEVC/H.265（高効率）": "hevc", "VP9（Web標準）": "vp9", "AV1（次世代）": "av1"}
         current_codec = self.config.get("preferred_codec", "avc")
         for text, key in codecs.items():
             radio = QRadioButton(text); radio.setProperty("config_value", key); self.codec_button_group.addButton(radio); c_radio_layout.addWidget(radio)
@@ -169,10 +169,10 @@ class SettingsDialog(QDialog):
         hw_groupbox = QWidget()
         hw_v_layout = QVBoxLayout(hw_groupbox)
         hw_v_layout.setContentsMargins(0,0,0,0)
-        hw_v_layout.addWidget(QLabel("코덱 변환 가속 (GPU 인코딩):"))
+        hw_v_layout.addWidget(QLabel("コーデック変換の高速化 (GPUエンコード):"))
         self.hw_encoder_combo = QComboBox()
         self.hw_encoder_map = {
-            "CPU (기본값, 호환성)": "cpu",
+            "CPU（デフォルト、互換性）": "cpu",
             "NVIDIA (NVENC)": "nvidia",
             "Intel (QSV)": "intel",
             "AMD (AMF)": "amd"
@@ -189,40 +189,40 @@ class SettingsDialog(QDialog):
         quality_layout = QFormLayout(quality_group)
         quality_layout.setContentsMargins(0, 5, 0, 5)
         quality_layout.setSpacing(10)
-        quality_layout.addRow(QLabel("상세 품질 설정 (숫자가 낮을수록 고품질)"))
+        quality_layout.addRow(QLabel("詳細品質設定（数値が低いほど高画質）"))
         
         self.q_cpu_h264_crf = QSpinBox()
         self.q_cpu_h264_crf.setRange(0, 51)
         self.q_cpu_h264_crf.setValue(self.config.get("quality_cpu_h264_crf", 26)) 
-        quality_layout.addRow("CPU H.264 CRF (권장: 26):", self.q_cpu_h264_crf)
+        quality_layout.addRow("CPU H.264 CRF (推奨: 26):", self.q_cpu_h264_crf)
         
         self.q_cpu_h265_crf = QSpinBox()
         self.q_cpu_h265_crf.setRange(0, 51)
         self.q_cpu_h265_crf.setValue(self.config.get("quality_cpu_h265_crf", 31)) 
-        quality_layout.addRow("CPU H.265 CRF (권장: 31):", self.q_cpu_h265_crf)
+        quality_layout.addRow("CPU H.265 CRF (推奨: 31):", self.q_cpu_h265_crf)
         
         self.q_cpu_vp9_crf = QSpinBox()
         self.q_cpu_vp9_crf.setRange(0, 63)
         self.q_cpu_vp9_crf.setValue(self.config.get("quality_cpu_vp9_crf", 36)) 
-        quality_layout.addRow("CPU VP9 CRF (권장: 36):", self.q_cpu_vp9_crf)
+        quality_layout.addRow("CPU VP9 CRF (推奨: 36):", self.q_cpu_vp9_crf)
         
         self.q_cpu_av1_crf = QSpinBox()
         self.q_cpu_av1_crf.setRange(0, 63)
         self.q_cpu_av1_crf.setValue(self.config.get("quality_cpu_av1_crf", 41)) 
-        quality_layout.addRow("CPU AV1 CRF (권장: 41):", self.q_cpu_av1_crf)
+        quality_layout.addRow("CPU AV1 CRF (推奨: 41):", self.q_cpu_av1_crf)
         
         self.q_gpu_cq = QSpinBox()
         self.q_gpu_cq.setRange(0, 51)
         self.q_gpu_cq.setValue(self.config.get("quality_gpu_cq", 30)) 
-        quality_layout.addRow("GPU CQ/CQP (권장: 30):", self.q_gpu_cq)
+        quality_layout.addRow("GPU CQ/CQP (推奨: 30):", self.q_gpu_cq)
         
         layout.addWidget(quality_group)
-        layout.addStretch(1); self.tabs.addTab(tab, "화질")
+        layout.addStretch(1); self.tabs.addTab(tab, "画質")
 
     def _create_subtitle_tab(self):
         tab = QWidget(); layout = QVBoxLayout(tab); layout.setSpacing(15)
 
-        self.download_subs_checkbox = QCheckBox("자막 다운로드 활성화")
+        self.download_subs_checkbox = QCheckBox("字幕ダウンロードを有効にする")
         self.download_subs_checkbox.setChecked(self.config.get("download_subtitles", True))
         layout.addWidget(self.download_subs_checkbox)
 
@@ -231,18 +231,18 @@ class SettingsDialog(QDialog):
         line.setFrameShadow(QFrame.Shadow.Sunken)
         layout.addWidget(line)
 
-        self.embed_subs_checkbox = QCheckBox("자막을 동영상 파일에 병합 (Embed)")
+        self.embed_subs_checkbox = QCheckBox("字幕を動画ファイルに埋め込む (Embed)")
         self.embed_subs_checkbox.setChecked(self.config.get("embed_subtitles", True))
         layout.addWidget(self.embed_subs_checkbox)
 
-        self.sub_fmt_groupbox = QGroupBox("별도 파일 저장 시 포맷")
+        self.sub_fmt_groupbox = QGroupBox("別ファイル保存時の形式")
         sub_fmt_layout = QVBoxLayout(self.sub_fmt_groupbox)
         sub_fmt_layout.setSpacing(10)
         
         self.subtitle_format_button_group = QButtonGroup(self)
-        self.sub_format_vtt = QRadioButton("VTT (원본)")
+        self.sub_format_vtt = QRadioButton("VTT (元のまま)")
         self.sub_format_vtt.setProperty("config_value", "vtt")
-        self.sub_format_srt = QRadioButton("SRT (변환, 호환성 좋음)")
+        self.sub_format_srt = QRadioButton("SRT (変換、互換性重視)")
         self.sub_format_srt.setProperty("config_value", "srt")
         
         self.subtitle_format_button_group.addButton(self.sub_format_vtt)
@@ -269,25 +269,25 @@ class SettingsDialog(QDialog):
         self.embed_subs_checkbox.toggled.connect(update_ui_state)
         update_ui_state()
         layout.addStretch(1)
-        self.tabs.addTab(tab, "자막")
+        self.tabs.addTab(tab, "字幕")
 
     def _create_post_action_tab(self):
-        tab = QWidget(); layout = QVBoxLayout(tab); layout.addWidget(QLabel("모든 다운로드 완료 후 작업:"))
+        tab = QWidget(); layout = QVBoxLayout(tab); layout.addWidget(QLabel("すべてのダウンロード完了後の動作:"))
         radio_layout = QVBoxLayout(); radio_layout.setSpacing(10); self.post_action_button_group = QButtonGroup(self)
-        actions = {"아무 작업 안 함": "None", "다운로드 폴더 열기": "Open Folder", "1분 후 시스템 종료": "Shutdown"}
+        actions = {"何もしない": "None", "ダウンロードフォルダを開く": "Open Folder", "1分後にシャットダウン": "Shutdown"}
         current_action = self.config.get("post_action", "None")
         for text, key in actions.items():
             radio = QRadioButton(text); radio.setProperty("config_value", key); self.post_action_button_group.addButton(radio); radio_layout.addWidget(radio)
             if key == current_action: radio.setChecked(True)
-        layout.addLayout(radio_layout); layout.addStretch(1); self.tabs.addTab(tab, "다운로드 후 작업")
+        layout.addLayout(radio_layout); layout.addStretch(1); self.tabs.addTab(tab, "ダウンロード後の動作")
 
     def _create_advanced_tab(self):
         tab = QWidget(); layout = QVBoxLayout(tab); layout.setSpacing(20)
         
         bw_groupbox = QWidget(); bw_v_layout = QVBoxLayout(bw_groupbox); bw_v_layout.setContentsMargins(0,0,0,0)
-        bw_v_layout.addWidget(QLabel("대역폭 제한:"))
+        bw_v_layout.addWidget(QLabel("帯域幅制限:"))
         self.bw_limit_button_group = QButtonGroup(self); bw_radio_layout = QVBoxLayout(); bw_radio_layout.setSpacing(10)
-        limits = {"제한 없음": "0", "1 MB/s": "1M", "5 MB/s": "5M", "10 MB/s": "10M", "50 MB/s": "50M"}
+        limits = {"制限なし": "0", "1 MB/s": "1M", "5 MB/s": "5M", "10 MB/s": "10M", "50 MB/s": "50M"}
         current_limit = self.config.get("bandwidth_limit", "0")
         for text, key in limits.items():
             radio = QRadioButton(text); radio.setProperty("config_value", key); self.bw_limit_button_group.addButton(radio); bw_radio_layout.addWidget(radio)
@@ -295,15 +295,15 @@ class SettingsDialog(QDialog):
         bw_v_layout.addLayout(bw_radio_layout); layout.addWidget(bw_groupbox)
         
         conv_groupbox = QWidget(); conv_v_layout = QVBoxLayout(conv_groupbox); conv_v_layout.setContentsMargins(0,0,0,0)
-        conv_v_layout.addWidget(QLabel("다운로드 후 변환 (컨테이너):"))
+        conv_v_layout.addWidget(QLabel("ダウンロード後の変換 (コンテナ):"))
         self.conversion_button_group = QButtonGroup(self); conv_radio_layout = QVBoxLayout(); conv_radio_layout.setSpacing(10)
-        formats = {"변환 안 함 (MP4)": "none", "AVI로 변환": "avi", "MOV로 변환": "mov", "오디오만 추출 (MP3)": "mp3"}
+        formats = {"変換しない (MP4)": "none", "AVIに変換": "avi", "MOVに変換": "mov", "音声のみ抽出 (MP3)": "mp3"}
         current_format = self.config.get("conversion_format", "none")
         for text, key in formats.items():
             radio = QRadioButton(text); radio.setProperty("config_value", key); self.conversion_button_group.addButton(radio); conv_radio_layout.addWidget(radio)
             if key == current_format: radio.setChecked(True)
         conv_v_layout.addLayout(conv_radio_layout)
-        self.delete_original_checkbox = QCheckBox("변환 후 원본 파일 삭제")
+        self.delete_original_checkbox = QCheckBox("変換後に元ファイルを削除")
         self.delete_original_checkbox.setChecked(self.config.get("delete_on_conversion", False))
         self.conversion_button_group.buttonToggled.connect(self._toggle_delete_checkbox)
         self._toggle_delete_checkbox()
@@ -312,26 +312,26 @@ class SettingsDialog(QDialog):
         exclude_groupbox = QWidget()
         exclude_v_layout = QVBoxLayout(exclude_groupbox)
         exclude_v_layout.setContentsMargins(0,0,0,0)
-        exclude_v_layout.addWidget(QLabel("시리즈 분석 시 제외할 키워드 (쉼표,로 구분):"))
+        exclude_v_layout.addWidget(QLabel("シリーズ分析時に除外するキーワード（カンマで区切る）:"))
         current_keywords = self.config.get("series_exclude_keywords", [])
         self.exclude_keywords_edit = QLineEdit(", ".join(current_keywords))
-        self.exclude_keywords_edit.setPlaceholderText("예: 予告, SP, ダイジェスト")
+        self.exclude_keywords_edit.setPlaceholderText("例: 予告, SP, ダイジェスト")
         exclude_v_layout.addWidget(self.exclude_keywords_edit)
         layout.addWidget(exclude_groupbox)
 
-        layout.addStretch(1); self.tabs.addTab(tab, "고급")
+        layout.addStretch(1); self.tabs.addTab(tab, "詳細")
 
     def _create_cache_tab(self):
         tab = QWidget(); layout = QVBoxLayout(tab); layout.setSpacing(15)
         info_layout = QHBoxLayout()
-        info_layout.addWidget(QLabel("현재 썸네일 캐시 크기:"))
-        self.cache_size_label = QLabel("계산 중..."); self.cache_size_label.setObjectName("PaneSubtitle")
+        info_layout.addWidget(QLabel("現在のサムネイルキャッシュサイズ:"))
+        self.cache_size_label = QLabel("計算中..."); self.cache_size_label.setObjectName("PaneSubtitle")
         info_layout.addWidget(self.cache_size_label); info_layout.addStretch(1)
         layout.addLayout(info_layout)
-        self.clear_cache_button = QPushButton("썸네일 캐시 지우기"); self.clear_cache_button.setObjectName("DangerButton")
+        self.clear_cache_button = QPushButton("サムネイルキャッシュを削除"); self.clear_cache_button.setObjectName("DangerButton")
         self.clear_cache_button.clicked.connect(self._clear_thumbnail_cache)
         layout.addWidget(self.clear_cache_button)
-        layout.addStretch(1); self.tabs.addTab(tab, "캐시")
+        layout.addStretch(1); self.tabs.addTab(tab, "キャッシュ")
 
     def _toggle_delete_checkbox(self):
         selected_button = self.conversion_button_group.checkedButton()
@@ -339,7 +339,7 @@ class SettingsDialog(QDialog):
         self.delete_original_checkbox.setEnabled(is_conversion_selected)
 
     def _browse_folder(self):
-        folder = QFileDialog.getExistingDirectory(self, "다운로드 폴더 선택", self.folder_path_edit.text())
+        folder = QFileDialog.getExistingDirectory(self, "ダウンロードフォルダを選択", self.folder_path_edit.text())
         if folder: self.folder_path_edit.setText(folder)
 
     def _save_settings(self):

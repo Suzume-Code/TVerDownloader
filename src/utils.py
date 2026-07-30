@@ -14,12 +14,12 @@ from PyQt6.QtWidgets import QMessageBox
 CONFIG_FILE = "downloader_config.json"
 DEFAULT_PARALLEL = 5
 PARALLEL_MIN = 1
-PARALLEL_MAX = 20  # 수정: 최대 동시 다운로드 수 상향 (10 -> 20)
-FILENAME_TITLE_MAX_LENGTH = 80  # 수정: 파일명 길이 제한 축소 (경로 길이 오류 방지)
+PARALLEL_MAX = 20  # 修正：最大同時ダウンロード数を増加（10 → 20）
+FILENAME_TITLE_MAX_LENGTH = 80  # 修正：ファイル名の長さ制限を短縮（パス長のエラー防止）
 
 
 def load_config() -> Dict[str, Any]:
-    """설정 파일 로드(없으면 기본값). dict 병합으로 부분 업데이트 허용."""
+    """設定ファイルの読み込み（ない場合はデフォルト値）。dictのマージによる部分的な更新を許可。"""
     config = {
         "theme": "light",
         "download_folder": "",
@@ -144,9 +144,9 @@ def handle_exception(exc_type, exc_value, exc_traceback):
         f.write(error_message)
     error_box = QMessageBox()
     error_box.setIcon(QMessageBox.Icon.Critical)
-    error_box.setWindowTitle("오류")
-    error_box.setText("치명적인 오류가 발생했습니다.")
-    error_box.setInformativeText(f"오류 상세가 '{log_file}' 파일에 저장되었습니다.")
+    error_box.setWindowTitle("エラー")
+    error_box.setText("致命的なエラーが発生しました。")
+    error_box.setInformativeText(f"エラーの詳細は '{log_file}' ファイルに保存されました。")
     error_box.setStandardButtons(QMessageBox.StandardButton.Ok)
     error_box.exec()
 

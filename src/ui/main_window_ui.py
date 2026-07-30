@@ -1,7 +1,7 @@
 # src/ui/main_window_ui.py
-# 수정:
-# - QAbstractItemView import 추가
-# - _create_download_tab: download_list의 SelectionMode를 ExtendedSelection으로 설정하여 다중 선택 허용
+# 修正:
+# - QAbstractItemView import 追加
+# - _create_download_tab: download_listのSelectionModeをExtendedSelectionに設定して複数選択を許可
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QPushButton, QTextEdit,
@@ -30,10 +30,10 @@ class MainWindowUI:
     def _create_header(self, root_layout):
         header = QFrame(objectName="AppHeader")
         layout = QHBoxLayout(header); layout.setContentsMargins(16, 10, 16, 10); layout.setSpacing(8)
-        self.app_title = QLabel("티버 다운로더 (TVer Downloader)", objectName="AppTitle")
-        self.about_button = QPushButton("정보", objectName="InfoButton")
-        self.settings_button = QPushButton("설정", objectName="PrimaryButton")
-        self.on_top_btn = QToolButton(objectName="OnTopButton", toolTip="항상 위")
+        self.app_title = QLabel("TVerダウンローダー (TVer Downloader)", objectName="AppTitle")
+        self.about_button = QPushButton("情報", objectName="InfoButton")
+        self.settings_button = QPushButton("設定", objectName="PrimaryButton")
+        self.on_top_btn = QToolButton(objectName="OnTopButton", toolTip="常に上")
         self.on_top_btn.setCheckable(True)
         self.on_top_btn.setFixedSize(28, 28)
         layout.addWidget(self.app_title); layout.addStretch(1)
@@ -45,9 +45,9 @@ class MainWindowUI:
     def _create_input_bar(self, root_layout):
         input_bar = QFrame(objectName="InputBar")
         layout = QHBoxLayout(input_bar); layout.setContentsMargins(16, 12, 16, 12); layout.setSpacing(10)
-        self.url_input = QLineEdit(placeholderText="TVer 영상 URL 붙여넣기", objectName="UrlInput")
-        self.bulk_button = QPushButton("다중 추가", objectName="OrangeButton")
-        self.add_button = QPushButton("다운로드", objectName="AccentButton")
+        self.url_input = QLineEdit(placeholderText="TVer 動画のURLを貼り付ける", objectName="UrlInput")
+        self.bulk_button = QPushButton("複数追加", objectName="OrangeButton")
+        self.add_button = QPushButton("ダウンロード", objectName="AccentButton")
         layout.addWidget(self.url_input, 1); layout.addWidget(self.bulk_button); layout.addWidget(self.add_button)
         root_layout.addWidget(input_bar)
 
@@ -64,27 +64,27 @@ class MainWindowUI:
         splitter = QSplitter(Qt.Orientation.Horizontal, objectName="MainSplitter")
         left_pane = QFrame(objectName="LeftPane"); left_layout = QVBoxLayout(left_pane)
         left_layout.setContentsMargins(8, 8, 8, 8); row = QHBoxLayout()
-        self.queue_label = QLabel("다운로드 목록", objectName="PaneTitle")
-        self.clear_completed_button = QPushButton("완료 항목 삭제", objectName="GhostButton")
-        self.queue_count_label = QLabel("0 대기 / 0 진행", objectName="PaneSubtitle")
+        self.queue_label = QLabel("ダウンロード一覧", objectName="PaneTitle")
+        self.clear_completed_button = QPushButton("完了した項目の削除", objectName="GhostButton")
+        self.queue_count_label = QLabel("0 待機 / 0 進行", objectName="PaneSubtitle")
         row.addWidget(self.queue_label); row.addStretch(1)
         row.addWidget(self.clear_completed_button)
         row.addWidget(self.queue_count_label)
         left_layout.addLayout(row)
         self.download_list = QListWidget(objectName="DownloadList")
         self.download_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        # --- 다중 선택 모드 설정 ---
+        # --- 複数選択モードの設定 ---
         self.download_list.setSelectionMode(QAbstractItemView.SelectionMode.ExtendedSelection)
         left_layout.addWidget(self.download_list, 1)
         right_pane = QFrame(objectName="RightPane"); right_layout = QVBoxLayout(right_pane)
         right_layout.setContentsMargins(8, 8, 8, 8); row_log = QHBoxLayout()
-        self.log_title = QLabel("로그", objectName="PaneTitle")
-        self.clear_log_button = QPushButton("지우기", objectName="GhostButton")
+        self.log_title = QLabel("ログ", objectName="PaneTitle")
+        self.clear_log_button = QPushButton("削除", objectName="GhostButton")
         row_log.addWidget(self.log_title); row_log.addStretch(1); row_log.addWidget(self.clear_log_button)
         self.log_output = QTextEdit(objectName="LogOutput", readOnly=True)
         right_layout.addLayout(row_log); right_layout.addWidget(self.log_output, 1)
         splitter.addWidget(left_pane); splitter.addWidget(right_pane); splitter.setSizes([640, 480])
-        layout.addWidget(splitter, 1); self.tabs.addTab(tab, "다운로드")
+        layout.addWidget(splitter, 1); self.tabs.addTab(tab, "ダウンロード")
 
     def _create_history_tab(self):
         tab = QWidget(objectName="HistoryTab")
@@ -92,11 +92,11 @@ class MainWindowUI:
         layout.setContentsMargins(12, 12, 12, 12)
         layout.setSpacing(8)
         top_controls = QHBoxLayout()
-        self.history_title = QLabel("다운로드 기록", objectName="PaneTitle")
+        self.history_title = QLabel("ダウンロード履歴", objectName="PaneTitle")
         self.history_sort_combo = QComboBox()
-        self.history_sort_combo.addItem("다운로드 최신순")
-        self.history_sort_combo.addItem("제목 오름차순")
-        self.history_search_input = QLineEdit(placeholderText="검색...")
+        self.history_sort_combo.addItem("ダウンロード 最新順")
+        self.history_sort_combo.addItem("タイトル 昇順")
+        self.history_search_input = QLineEdit(placeholderText="検索...")
         self.history_search_input.setClearButtonEnabled(True)
         self.history_search_input.setFixedWidth(200)
         top_controls.addWidget(self.history_title)
@@ -107,27 +107,27 @@ class MainWindowUI:
         self.history_list = QListWidget(objectName="HistoryList")
         self.history_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         layout.addWidget(self.history_list, 1)
-        self.tabs.addTab(tab, "기록")
+        self.tabs.addTab(tab, "記録")
 
     def _create_favorites_tab(self):
         tab = QWidget(objectName="FavoritesTab")
         layout = QVBoxLayout(tab); layout.setContentsMargins(12, 12, 12, 12); layout.setSpacing(8)
-        row = QHBoxLayout(); row.addWidget(QLabel("즐겨찾기 (시리즈)", objectName="PaneTitle")); row.addStretch(1); layout.addLayout(row)
+        row = QHBoxLayout(); row.addWidget(QLabel("お気に入り（シリーズ）", objectName="PaneTitle")); row.addStretch(1); layout.addLayout(row)
         ctrl = QHBoxLayout()
-        self.fav_input = QLineEdit(placeholderText="TVer 시리즈 URL (예: https://tver.jp/series/....)")
-        self.fav_add_btn = QPushButton("추가", objectName="PrimaryButton")
-        self.fav_del_btn = QPushButton("삭제", objectName="DangerButton")
-        self.fav_chk_btn = QPushButton("신규 영상 확인", objectName="PurpleButton")
+        self.fav_input = QLineEdit(placeholderText="TVer シリーズURL (例: https://tver.jp/series/....)")
+        self.fav_add_btn = QPushButton("追加", objectName="PrimaryButton")
+        self.fav_del_btn = QPushButton("削除", objectName="DangerButton")
+        self.fav_chk_btn = QPushButton("新しい動画を確認する", objectName="PurpleButton")
         ctrl.addWidget(self.fav_input, 1); ctrl.addWidget(self.fav_add_btn); ctrl.addWidget(self.fav_del_btn)
         ctrl.addWidget(self.fav_chk_btn); layout.addLayout(ctrl)
         self.fav_list = QListWidget(objectName="FavoritesList"); self.fav_list.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        layout.addWidget(self.fav_list, 1); self.tabs.addTab(tab, "즐겨찾기")
+        layout.addWidget(self.fav_list, 1); self.tabs.addTab(tab, "お気に入り")
     
     def setup_tray(self, app_version):
         tray_icon = self.main_window.tray_icon; tray_icon.setIcon(get_app_icon())
         tray_icon.setToolTip(f"TVer Downloader {app_version}")
         tray_menu = QMenu()
-        restore_action = QAction("창 복원", self.main_window, triggered=self.main_window.bring_to_front)
-        quit_action = QAction("완전 종료", self.main_window, triggered=self.main_window.quit_application)
+        restore_action = QAction("ウィンドウの復元", self.main_window, triggered=self.main_window.bring_to_front)
+        quit_action = QAction("完全に終了", self.main_window, triggered=self.main_window.quit_application)
         tray_menu.addAction(restore_action); tray_menu.addAction(quit_action)
         tray_icon.setContextMenu(tray_menu); tray_icon.show()

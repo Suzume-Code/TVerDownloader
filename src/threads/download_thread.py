@@ -29,13 +29,13 @@ class DownloadThread(QThread):
         self.subtitle_format = subtitle_format
         
         self.process: Optional[subprocess.Popen] = None
-        self._stop_flag = False; self._current_component: str = "비디오"; self._final_filepath: str = ""
+        self._stop_flag = False; self._current_component: str = "動画"; self._final_filepath: str = ""
         self._metadata: Dict = {}
 
     def stop(self):
         if self._stop_flag: return
         self._stop_flag = True
-        try: self.progress.emit(self.url, {"status": "취소 중...", "log": "사용자 중단 요청"})
+        try: self.progress.emit(self.url, {"status": "キャンセル中...", "log": "ユーザーによる中断要求"})
         except RuntimeError: pass
         self._kill_process_tree()
 
@@ -60,20 +60,20 @@ class DownloadThread(QThread):
         try: is_successful = self._execute_download()
         except Exception as e:
             is_successful = False
-            log_msg = f"다운로드 스레드 예외 발생: {e}"
-            self.progress.emit(self.url, {"status": "오류", "log": log_msg})
+            log_msg = f"ダウンロードスレッド例外発生: {e}"
+            self.progress.emit(self.url, {"status": "エラー", "log": log_msg})
         self.finished.emit(self.url, is_successful, self._final_filepath if is_successful else "", self._metadata)
 
     def _convert_vtt_to_srt(self, vtt_filepath: Path):
-        """FFmpeg를 사용하여 VTT 파일을 SRT 파일로 변환하고 원본 VTT를 삭제합니다."""
+        """FFmpegを使用してVTTファイルをSRTファイルに変換し、元のVTTを削除します。"""
         if not vtt_filepath.exists():
-            self.progress.emit(self.url, {"log": f"[오류] SRT 변환 대상 VTT 파일을 찾지 못함: {vtt_filepath}"})
+            self.progress.emit(self.url, {"log": f"[エラー] SRT変換対象のVTTファイルが見つかりません: {vtt_filepath}"})
             return
 
         srt_filepath = vtt_filepath.with_suffix('.srt')
         
         if srt_filepath.exists():
-            self.progress.emit(self.url, {"log": "SRT 파일이 이미 존재합니다."})
+            self.progress.emit(self.url, {"log": "SRTファイルは既に存在します。"})
             return
 
         command = [
@@ -86,49 +86,48 @@ class DownloadThread(QThread):
         try:
             proc = subprocess.run(command, capture_output=True, text=True, startupinfo=get_startupinfo(), timeout=15)
             if proc.returncode == 0:
-                self.progress.emit(self.url, {"log": "자막을 SRT로 변환했습니다."})
+                self.progress.emit(self.url, {"log": "字幕をSRTに変換しました。"})
                 try:
                     vtt_filepath.unlink()
                 except OSError as e:
-                    self.progress.emit(self.url, {"log": f"[오류] 원본 VTT 파일 삭제 실패: {e}"})
+                    self.progress.emit(self.url, {"log": f"[エラー] 元のVTTファイルの削除に失敗しました: {e}"})
             else:
-                self.progress.emit(self.url, {"log": f"[오류] SRT 변환 실패: {proc.stderr}"})
+                self.progress.emit(self.url, {"log": f"[エラー] SRT変換に失敗しました: {proc.stderr}"})
         except Exception as e:
-            self.progress.emit(self.url, {"log": f"[오류] SRT 변환 중 예외 발생: {e}"})
-
+            self.progress.emit(self.url, {"log": f"[エラー] SRT変換中に例外が発生しました: {e}"})
     def _execute_download(self) -> bool:
         self._metadata = self._get_metadata() or {}
         if not self._metadata:
-            self.progress.emit(self.url, {"status": "오류", "log": "메타데이터를 가져올 수 없습니다."}); return False
+            self.progress.emit(self.url, {"status": "エラー", "log": "メタデータを取得できません。"}); return False
 
-        self.progress.emit(self.url, {"title": self._metadata.get("title", "제목 없음"), "thumbnail": self._metadata.get("thumbnail")})
+        self.progress.emit(self.url, {"title": self._metadata.get("title", "(タイトルなし)"), "thumbnail": self._metadata.get("thumbnail")})
         self._final_filepath = self._build_final_filepath(self._metadata)
         command = self._build_command(self._final_filepath)
         popen_kwargs: Dict[str, Any] = {}
         if os.name == 'nt': popen_kwargs['creationflags'] = subprocess.CREATE_NO_WINDOW | subprocess.CREATE_NEW_PROCESS_GROUP
         else: popen_kwargs['start_new_session'] = True
 
-        self.progress.emit(self.url, {"status": "다운로드 중", "log": "yt-dlp 프로세스 시작..."})
+        self.progress.emit(self.url, {"status": "ダウンロード中", "log": "yt-dlpプロセス開始..."})
         self.process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, encoding="utf-8", errors="ignore", **popen_kwargs)
 
         if self.process and self.process.stdout:
             for line in iter(self.process.stdout.readline, ""):
-                if self._stop_flag: self.progress.emit(self.url, {"status": "취소됨"}); return False
+                if self._stop_flag: self.progress.emit(self.url, {"status": "キャンセル済み"}); return False
                 self._parse_line(line)
         if self._stop_flag: return False
         rc = self.process.wait(timeout=5) if self.process else 1
         
         if not os.path.exists(self._final_filepath):
-             self.progress.emit(self.url, {"log": f"[오류] 최종 파일이 지정된 경로에 없습니다: {self._final_filepath}"})
+             self.progress.emit(self.url, {"log": f"[エラー] 最終ファイルが指定されたパスに存在しません: {self._final_filepath}"})
 
         success = (rc == 0) and os.path.exists(self._final_filepath)
         
         if success and self.download_subtitles and not self.embed_subtitles and self.subtitle_format == 'srt':
-            self.progress.emit(self.url, {"status": "자막 변환 중 (SRT)..."})
+            self.progress.emit(self.url, {"status": "字幕変換中 (SRT)..."})
             vtt_path = Path(self._final_filepath).with_suffix('.ja.vtt')
             self._convert_vtt_to_srt(vtt_path)
 
-        final_status = "완료" if success else "오류"
+        final_status = "完了" if success else "エラー"
         self.progress.emit(self.url, {"status": final_status, "percent": 100, "final_filepath": self._final_filepath})
         return success
 
@@ -142,29 +141,29 @@ class DownloadThread(QThread):
     def _build_final_filepath(self, metadata: Dict[str, Any]) -> str:
         template, ext = self.output_template.rsplit('.', 1)
         
-        # [수정] 시리즈/타이틀 중복 제거 로직 강화 (정규식 도입)
+        # [修正] シリーズ/タイトル重複除去ロジック強化（正規表現導入）
         series_title = (metadata.get('series') or metadata.get('playlist_title') or '').strip()
         episode_title = metadata.get('title', 'NA').strip()
         
         if series_title:
-            # 1. 먼저 정확한 매칭 시도
+            # 1. まず厳密一致を試行
             if episode_title.startswith(series_title):
                 episode_title = episode_title[len(series_title):]
             else:
-                # 2. 실패 시 정규식으로 유연하게 매칭 (특수문자 이스케이프 + 공백 무시)
+                # 2. 失敗した場合は正規表現で柔軟にマッチ
                 try:
-                    # 시리즈명을 안전한 패턴으로 변환 (특수문자 처리)
+                    # シリーズ名を安全なパターンに変換
                     safe_series = re.escape(series_title)
-                    # 시리즈 제목이 에피소드 제목의 '맨 앞'에 오는지 검사
-                    # 뒤에 공백/특수문자가 올 수 있음을 가정
+                    # シリーズ名がエピソードタイトルの先頭にあるかを確認
+                    # その後に空白や特殊文字が続く可能性を許容
                     match = re.match(r'^' + safe_series, episode_title, re.IGNORECASE)
                     if match:
                          episode_title = episode_title[match.end():]
                 except Exception:
                     pass
 
-            # 3. 중복 제거 후 남은 문자열 앞쪽의 구분자(공백, 콜론, 대시, 전각공백 등) 제거
-            # \u3000: 전각 공백 (일본어 텍스트에서 흔함)
+            # 3. 重複除去後、残った文字列の先頭の区切り文字（空白、コロン、ダッシュ、全角スペースなど）を削除
+            # \u3000: 全角スペース（日本語テキストでよく見られる）
             episode_title = re.sub(r'^[:\-\s\u3000]+', '', episode_title).strip()
             
         def replacer(match):
@@ -178,7 +177,7 @@ class DownloadThread(QThread):
         path_without_ext = re.sub(r'%\((.*?)\)s', replacer, template)
         path_without_ext = re.sub(r'\s+', ' ', path_without_ext).strip()
 
-        # [수정] 전체 경로 길이 제한 및 자동 축소 (Windows MAX_PATH 대응)
+        # [修正] 全パス長制限および自動縮小（Windows MAX_PATH対応）
         full_dir = os.path.abspath(self.download_folder)
         filename = f"{path_without_ext}.{metadata.get('ext', ext)}"
         full_path = os.path.join(full_dir, filename)
@@ -194,7 +193,7 @@ class DownloadThread(QThread):
             
             filename = f"{path_without_ext}.{metadata.get('ext', ext)}"
             full_path = os.path.join(full_dir, filename)
-            self.progress.emit(self.url, {"log": f"[알림] 경로가 너무 길어 파일명을 축소했습니다: {filename}"})
+            self.progress.emit(self.url, {"log": f"[通知] パスが長すぎるためファイル名を縮小しました: {filename}"})
             
         return full_path
 
@@ -242,15 +241,15 @@ class DownloadThread(QThread):
                 self._final_filepath = line.split("Destination:", 1)[1].strip()
             
             destination_path = line.split("Destination:", 1)[1].lower()
-            if ".m4a" in destination_path or "audio" in destination_path: self._current_component = "오디오"
-            else: self._current_component = "비디오"
+            if ".m4a" in destination_path or "audio" in destination_path: self._current_component = "音声"
+            else: self._current_component = "動画"
         
         m_progress = re.search(r"\[download\]\s+([0-9.]+)% of.*?at (.*?/s)\s+ETA\s+(.*)", line)
         if m_progress:
-            payload.update({"status": "다운로드 중", "percent": float(m_progress.group(1)), "speed": m_progress.group(2),
+            payload.update({"status": "ダウンロード中", "percent": float(m_progress.group(1)), "speed": m_progress.group(2),
                             "eta": m_progress.group(3), "component": self._current_component})
         
-        if "Merging formats" in line: payload["status"] = "후처리 중 (병합)"
-        elif "Embedding subtitles" in line: payload["status"] = "후처리 중 (자막)"
+        if "Merging formats" in line: payload["status"] = "後処理中（マージ）"
+        elif "Embedding subtitles" in line: payload["status"] = "後処理中（字幕）"
         
         if payload: self.progress.emit(self.url, payload)

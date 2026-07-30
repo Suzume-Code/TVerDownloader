@@ -34,7 +34,7 @@ class ThumbnailDownloader(QThread):
 class ImagePreviewDialog(QDialog):
     def __init__(self, pixmap: QPixmap, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("썸네일 미리보기"); self.setMinimumSize(640, 360); self.setModal(True)
+        self.setWindowTitle("サムネイルのプレビュー"); self.setMinimumSize(640, 360); self.setModal(True)
         self._original_pixmap = pixmap
         self.scroll_area = QScrollArea(self); self.scroll_area.setWidgetResizable(True)
         self.image_label = QLabel(alignment=Qt.AlignmentFlag.AlignCenter); self.scroll_area.setWidget(self.image_label)
@@ -52,19 +52,19 @@ class ImagePreviewDialog(QDialog):
         if event.button() == Qt.MouseButton.LeftButton: self.accept()
         elif event.button() == Qt.MouseButton.RightButton: self._show_context_menu(event.pos())
     def _show_context_menu(self, position):
-        menu = QMenu(self); save_action = QAction("이미지 저장", self)
+        menu = QMenu(self); save_action = QAction("画像を保存", self)
         save_action.triggered.connect(self._save_image); menu.addAction(save_action)
         global_position = self.image_label.mapToGlobal(position); menu.exec(global_position)
     def _save_image(self):
         if not self._original_pixmap or self._original_pixmap.isNull(): return
-        file_path, _ = QFileDialog.getSaveFileName(self, "이미지 저장", "thumbnail.png", "Image Files (*.png *.jpg *.jpeg)")
+        file_path, _ = QFileDialog.getSaveFileName(self, "画像を保存", "thumbnail.png", "Image Files (*.png *.jpg *.jpeg)")
         if file_path: self._original_pixmap.save(file_path)
 
 class DownloadItemWidget(QWidget):
     play_requested = pyqtSignal(str)
     def __init__(self, url: str, parent=None):
         super().__init__(parent)
-        self.setObjectName("DownloadItem"); self.url = url; self.status: str = "대기"
+        self.setObjectName("DownloadItem"); self.url = url; self.status: str = "待機"
         self.final_filepath: Optional[str] = None; self._thumb_url: Optional[str] = None
         self._thumb_downloader: Optional[ThumbnailDownloader] = None; self._orig_thumb_pm: Optional[QPixmap] = None
         root = QHBoxLayout(self); root.setContentsMargins(12, 10, 12, 10); root.setSpacing(12)
@@ -72,28 +72,28 @@ class DownloadItemWidget(QWidget):
         self.thumb_label.setFixedSize(180, 102); self.thumb_label.mousePressEvent = self._on_thumb_clicked; root.addWidget(self.thumb_label)
         center_widget = QWidget(); center_layout = QVBoxLayout(center_widget)
         center_layout.setContentsMargins(0, 0, 0, 0); center_layout.setSpacing(6)
-        self.title_label = QLabel("제목 로딩 중…", objectName="Title", wordWrap=True)
-        self.status_label = QLabel("대기", objectName="Status")
+        self.title_label = QLabel("タイトルを読み込み中…", objectName="Title", wordWrap=True)
+        self.status_label = QLabel("待機", objectName="Status")
         self.progress = QProgressBar(self, objectName="Progress", textVisible=False, minimumHeight=16)
         center_layout.addWidget(self.title_label); center_layout.addWidget(self.status_label)
         center_layout.addWidget(self.progress); root.addWidget(center_widget, 1)
 
     def mouseDoubleClickEvent(self, event):
-        if self.status == "완료" and self.final_filepath and os.path.isfile(self.final_filepath): self.play_requested.emit(self.final_filepath)
+        if self.status == "完了" and self.final_filepath and os.path.isfile(self.final_filepath): self.play_requested.emit(self.final_filepath)
         super().mouseDoubleClickEvent(event)
 
     def _on_thumb_clicked(self, event):
         if self._orig_thumb_pm and not self._orig_thumb_pm.isNull(): ImagePreviewDialog(self._orig_thumb_pm, self).exec()
 
     def reset_for_retry(self):
-        self.status = "대기"
+        self.status = "待機"
         self.final_filepath = None
         self.progress.setValue(0)
         if self.progress.property("state") != "active":
             self.progress.setProperty("state", "active")
             self.progress.style().unpolish(self.progress)
             self.progress.style().polish(self.progress)
-        self.status_label.setText("대기")
+        self.status_label.setText("待機")
 
     def update_progress(self, payload: dict):
         if "thumbnail" in payload and payload["thumbnail"] != self._thumb_url:
@@ -101,21 +101,21 @@ class DownloadItemWidget(QWidget):
         if payload.get("title"): self.title_label.setText(payload["title"])
         if "final_filepath" in payload: self.final_filepath = payload["final_filepath"]
         component = payload.get("component"); percent = payload.get("percent", self.progress.value())
-        if component == "비디오": progress_value = int(percent / 2)
-        elif component == "오디오": progress_value = 50 + int(percent / 2)
+        if component == "動画": progress_value = int(percent / 2)
+        elif component == "音声": progress_value = 50 + int(percent / 2)
         else: progress_value = self.progress.value()
         self.progress.setValue(progress_value)
         if "status" in payload:
             self.status = payload["status"]; status_text = self.status
-            if self.status == "다운로드 중":
+            if self.status == "ダウンロード中":
                 speed = payload.get('speed', ''); eta = payload.get('eta', '')
                 comp_text = f"{component} " if component else ""
-                speed_eta_text = f"... {speed} (남은 시간: {eta})" if speed and eta else "..."
-                status_text = f"{comp_text}다운 중{speed_eta_text}"
+                speed_eta_text = f"... {speed} (残り時間: {eta})" if speed and eta else "..."
+                status_text = f"{comp_text}ダウンロード中{speed_eta_text}"
             self.status_label.setText(status_text)
             state_prop = "active"
-            if self.status == "완료": state_prop = "done"; self.progress.setValue(100)
-            elif self.status in ("오류", "취소됨", "실패", "중단", "변환 오류"): state_prop = "error"
+            if self.status == "完了": state_prop = "done"; self.progress.setValue(100)
+            elif self.status in ("エラー", "キャンセル済み", "失敗", "中断", "変換エラー"): state_prop = "error"
             if self.progress.property("state") != state_prop:
                 self.progress.setProperty("state", state_prop); self.progress.style().unpolish(self.progress); self.progress.style().polish(self.progress)
         self.update()
@@ -148,14 +148,14 @@ class FavoriteItemWidget(QWidget):
         info_widget = QWidget(); info_layout = QVBoxLayout(info_widget)
         info_layout.setContentsMargins(0, 0, 0, 0); info_layout.setSpacing(4)
 
-        title_text = self.meta.get("title") or "(제목 확인 중...)"
+        title_text = self.meta.get("title") or "(タイトル確認中...)"
         self.title_label = QLabel(title_text); self.title_label.setObjectName("Title")
         self.title_label.setWordWrap(True)
 
         self.url_label = QLabel(self.url); self.url_label.setObjectName("PaneSubtitle")
         self.url_label.setWordWrap(True)
 
-        self.last_check_label = QLabel(f"마지막 확인: {self.meta.get('last_check', '-')}"); self.last_check_label.setObjectName("PaneSubtitle")
+        self.last_check_label = QLabel(f"最終確認: {self.meta.get('last_check', '-')}"); self.last_check_label.setObjectName("PaneSubtitle")
 
         info_layout.addWidget(self.title_label)
         info_layout.addWidget(self.url_label)
@@ -187,7 +187,7 @@ class FavoriteItemWidget(QWidget):
             pixmap = QPixmap();
             if pixmap.loadFromData(data): self._set_thumbnail_pixmap(pixmap)
 
-    # --- [수정된 부분 시작] ---
+    # --- [修正済み部分 開始] ---
     def _set_thumbnail_pixmap(self, pixmap: QPixmap):
         """Safely sets the thumbnail pixmap, checking if the label exists."""
         # ✅ Check if the thumb_label exists before using it
@@ -198,7 +198,7 @@ class FavoriteItemWidget(QWidget):
         except RuntimeError:
             # Catch the specific error if the label was deleted between the check and use
             pass
-    # --- [수정된 부분 끝] ---
+    # --- [修正済み部分 終了] ---
 
 class HistoryItemWidget(QWidget):
     def __init__(self, url: str, meta: Dict[str, str], parent=None):
@@ -211,7 +211,7 @@ class HistoryItemWidget(QWidget):
         self.thumb_label = QLabel(objectName="Thumb", alignment=Qt.AlignmentFlag.AlignCenter); self.thumb_label.setFixedSize(128, 72); root.addWidget(self.thumb_label)
         info_widget = QWidget(); info_layout = QVBoxLayout(info_widget)
         info_layout.setContentsMargins(0, 0, 0, 0); info_layout.setSpacing(4)
-        self.title_label = QLabel(self.meta.get("title", "(제목 없음)")); self.title_label.setWordWrap(True)
+        self.title_label = QLabel(self.meta.get("title", "(タイトルなし)")); self.title_label.setWordWrap(True)
         self.date_label = QLabel(self.meta.get("date", "")); self.date_label.setObjectName("PaneSubtitle")
         self.url_label = QLabel(self.url); self.url_label.setObjectName("PaneSubtitle")
         info_layout.addWidget(self.title_label); info_layout.addWidget(self.date_label)
